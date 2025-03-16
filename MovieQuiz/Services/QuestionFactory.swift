@@ -9,7 +9,7 @@ import UIKit
 
 final class QuestionFactory: QuestionFactoryProtocol {
     
-    // MARK: - Public Properties
+    // MARK: - Delegate
     weak var delegate: QuestionFactoryDelegate?
     
     // MARK: - Private Properties
@@ -57,7 +57,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
         delegate?.didReceiveNextQuestion(question: question)
     }
     
-    func setDelegate(delegate: QuestionFactoryDelegate) {
-        self.delegate = delegate
-    }
+//    func setDelegate(delegate: QuestionFactoryDelegate) {
+//        self.delegate = delegate
+//    }
 }

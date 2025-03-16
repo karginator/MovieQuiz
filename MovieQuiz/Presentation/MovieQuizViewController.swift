@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, AlertPresenterDelegate {
     
     // MARK: - IB Outlets
     @IBOutlet private weak var imageView: UIImageView!
@@ -15,6 +15,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
+    private var alertPresenter: AlertPresenterProtocol?
+//    private var alertModel: AlertModel?
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
@@ -25,10 +27,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let questionFactory = QuestionFactory()
         questionFactory.delegate = self
         self.questionFactory = questionFactory
-        
-        guard let questionFactory = self.questionFactory else {
-            return
-        }
         questionFactory.requestNextQuestion()
     }
     
@@ -65,6 +63,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self?.show(quiz: viewModel)
         }
     }
+    
+    // MARK: - AlertPresenterDelegate
+    func alertPresenter(present alert: UIAlertController?) {
+        guard let alert = alert else { return }
+        self.present(alert, animated: true, completion: nil)
+    }
+    
     
     // MARK: - Private Methods
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -109,32 +114,28 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                  buttonText: "Сыграть еще раз"))
         } else {
             currentQuestionIndex += 1
-            guard let questionFactory = self.questionFactory else {
-                return
-            }
-            questionFactory.requestNextQuestion()
+            questionFactory?.requestNextQuestion()
         }
     }
     
     private func show(quiz result: QuizResultsViewModel) {
-        let alert = UIAlertController(
-            title: result.title,
-            message: result.text,
-            preferredStyle: .alert)
         
-        let action = UIAlertAction(title: result.buttonText, style: .cancel) { [weak self] _ in
+        let complition = { [weak self] in
             guard let self = self else { return }
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
-            
-            guard let questionFactory = self.questionFactory else {
-                return
-            }
-            questionFactory.requestNextQuestion()
+            questionFactory?.requestNextQuestion()
         }
         
-        alert.addAction(action)
+        let alert = AlertModel(title: result.title,
+                               message: result.text,
+                               buttonText: result.buttonText,
+                               complition: complition)
         
-        self.present(alert, animated: true, completion: nil)
+        let alertPresenter = AlertPresenter()
+        alertPresenter.delegate = self
+        self.alertPresenter = alertPresenter
+        
+        alertPresenter.createAlert(create: alert)
     }
 }
