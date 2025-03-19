@@ -49,6 +49,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
     
     // MARK: - Public Methods
     func requestNextQuestion() {
+        
         guard let index = (0..<questions.count).randomElement() else {
             return
         }
@@ -57,7 +58,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
         delegate?.didReceiveNextQuestion(question: question)
     }
     
-//    func setDelegate(delegate: QuestionFactoryDelegate) {
-//        self.delegate = delegate
-//    }
+    func setDelegate(delegate: QuestionFactoryDelegate) {
+        self.delegate = delegate
+    }
 }

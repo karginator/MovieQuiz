@@ -13,10 +13,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
     private let questionsAmount: Int = 10
+    private let storage: UserDefaults = .standard
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenterProtocol?
-//    private var alertModel: AlertModel?
+    private var statisticService: StatisticServiceProtocol?
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
@@ -28,6 +29,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         questionFactory.delegate = self
         self.questionFactory = questionFactory
         questionFactory.requestNextQuestion()
+        
+        statisticService = StatisticService()
     }
     
     // MARK: - IB Actions
@@ -70,7 +73,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         self.present(alert, animated: true, completion: nil)
     }
     
-    
     // MARK: - Private Methods
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         let questionStep = QuizStepViewModel(image: UIImage(named: model.image) ?? UIImage(),
@@ -96,7 +98,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             self.correctAnswers += 1
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
             guard let self = self else { return }
             self.noButton.isUserInteractionEnabled = true
             self.yesButton.isUserInteractionEnabled = true
@@ -107,7 +109,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == self.questionsAmount - 1 {
-            let text = correctAnswers == self.questionsAmount ? "Поздравляем, вы ответили на 10 из 10!" : "Вы ответили на \(self.correctAnswers) из 10, попробуйте ещё раз!"
+            guard let statisticService = statisticService else {
+                return
+            }
+            statisticService.store(correct: self.correctAnswers, total: self.questionsAmount)
+            let countQuiz = storage.integer(forKey: Keys.gamesCount.rawValue)
+            
+            let text = "Ваш результат: \(self.correctAnswers)/\(self.questionsAmount)\nКоличество сыгранных квизов: \(countQuiz)\nРекорд: \(statisticService.bestGame.correct)/\(self.questionsAmount) (\(statisticService.bestGame.date.dateTimeString))\nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+            
             show(quiz: QuizResultsViewModel(
                  title: "Этот раунд окончен!",
                  text: text,
