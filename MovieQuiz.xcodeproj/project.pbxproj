@@ -20,7 +20,7 @@
 		CC3C00CA2D891201002E204F /* GameResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3C00C92D8911F9002E204F /* GameResult.swift */; };
 		CC3C00CC2D895602002E204F /* StatisticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3C00CB2D8955F2002E204F /* StatisticService.swift */; };
 		CC3C00CE2D899112002E204F /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3C00CD2D899101002E204F /* Keys.swift */; };
-		CC464FAE2D840DEB000FECBB /* AlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC464FAD2D840DE7000FECBB /* AlertPresenter.swift */; };
+		CC464FAE2D840DEB000FECBB /* ResultAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC464FAD2D840DE7000FECBB /* ResultAlertPresenter.swift */; };
 		CC464FB02D840DFD000FECBB /* AlertModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC464FAF2D840DFB000FECBB /* AlertModel.swift */; };
 		CC464FB32D856277000FECBB /* AlertPresenterDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC464FB22D856261000FECBB /* AlertPresenterDelegate.swift */; };
 		CC464FB52D85633A000FECBB /* AlertPresenterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC464FB42D856280000FECBB /* AlertPresenterProtocol.swift */; };
@@ -48,7 +48,7 @@
 		CC3C00C92D8911F9002E204F /* GameResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameResult.swift; sourceTree = "<group>"; };
 		CC3C00CB2D8955F2002E204F /* StatisticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticService.swift; sourceTree = "<group>"; };
 		CC3C00CD2D899101002E204F /* Keys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
-		CC464FAD2D840DE7000FECBB /* AlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPresenter.swift; sourceTree = "<group>"; };
+		CC464FAD2D840DE7000FECBB /* ResultAlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultAlertPresenter.swift; sourceTree = "<group>"; };
 		CC464FAF2D840DFB000FECBB /* AlertModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertModel.swift; sourceTree = "<group>"; };
 		CC464FB22D856261000FECBB /* AlertPresenterDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPresenterDelegate.swift; sourceTree = "<group>"; };
 		CC464FB42D856280000FECBB /* AlertPresenterProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPresenterProtocol.swift; sourceTree = "<group>"; };
@@ -105,7 +105,7 @@
 		8F4738322848DE2A005DF65E /* Presentation */ = {
 			isa = PBXGroup;
 			children = (
-				CC464FAD2D840DE7000FECBB /* AlertPresenter.swift */,
+				CC464FAD2D840DE7000FECBB /* ResultAlertPresenter.swift */,
 				AD1ABAB52831907B00B3E448 /* MovieQuizViewController.swift */,
 				AD1ABAB72831907B00B3E448 /* Main.storyboard */,
 			);
@@ -256,7 +256,7 @@
 				AD1ABAB22831907B00B3E448 /* AppDelegate.swift in Sources */,
 				CC464FB02D840DFD000FECBB /* AlertModel.swift in Sources */,
 				CC95220A2D7FDB5000494978 /* QuizQuestion.swift in Sources */,
-				CC464FAE2D840DEB000FECBB /* AlertPresenter.swift in Sources */,
+				CC464FAE2D840DEB000FECBB /* ResultAlertPresenter.swift in Sources */,
 				AD1ABAB42831907B00B3E448 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
