@@ -8,6 +8,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     @IBOutlet private weak var counterLabel: UILabel!
     @IBOutlet private weak var noButton: UIButton!
     @IBOutlet private weak var yesButton: UIButton!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Private Properties
     private var currentQuestionIndex = 0
@@ -24,13 +25,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         super.viewDidLoad()
         
         imageView.layer.cornerRadius = 20
-        
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
-        self.questionFactory = questionFactory
-        questionFactory.requestNextQuestion()
-        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         statisticService = StatisticService()
+        showLoadingIndicator()
+        questionFactory?.loadData()
     }
     
     // MARK: - IB Actions
@@ -73,9 +71,20 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         self.present(alert, animated: true, completion: nil)
     }
     
+    // MARK: - didLoadDataFromServer
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        questionFactory?.requestNextQuestion()
+    }
+    
+    // MARK: - didFailToLoadData
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(massage: error.localizedDescription)
+    }
+    
     // MARK: - Private Methods
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStep = QuizStepViewModel(image: UIImage(named: model.image) ?? UIImage(),
+        let questionStep = QuizStepViewModel(image: UIImage(data: model.image) ?? UIImage(),
                                              question: model.text,
                                              questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
         return questionStep
@@ -122,10 +131,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
                     Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
                     """
             
-            show(quiz: QuizResultsViewModel(
-                 title: "Этот раунд окончен!",
-                 text: text,
-                 buttonText: "Сыграть еще раз"))
+            show(quiz: QuizResultsViewModel(title: "Этот раунд окончен!",
+                                            text: text,
+                                            buttonText: "Сыграть еще раз"))
         } else {
             currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
@@ -144,6 +152,38 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         let alert = AlertModel(title: result.title,
                                message: result.text,
                                buttonText: result.buttonText,
+                               complition: complition)
+        
+        let alertPresenter = ResultAlertPresenter()
+        alertPresenter.delegate = self
+        self.alertPresenter = alertPresenter
+        
+        alertPresenter.createAlert(create: alert)
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+    }
+    
+    private func showNetworkError(massage: String) {
+        hideLoadingIndicator()
+        
+        let complition = { [weak self] in
+            guard let self else { return }
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+            questionFactory?.requestNextQuestion()
+            questionFactory?.loadData()
+        }
+        
+        let alert = AlertModel(title: "Ошибка",
+                               message: massage,
+                               buttonText: "Попробуй еще раз",
                                complition: complition)
         
         let alertPresenter = ResultAlertPresenter()
