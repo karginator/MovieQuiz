@@ -133,7 +133,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             
             show(quiz: QuizResultsViewModel(title: "Этот раунд окончен!",
                                             text: text,
-                                            buttonText: "Сыграть еще раз"))
+                                            buttonText: "Сыграть ещё раз"))
         } else {
             currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
