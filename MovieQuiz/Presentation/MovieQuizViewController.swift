@@ -45,9 +45,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question else {
-            return
-        }
+        guard let question else { return }
         
         currentQuestion = question
         let viewModel = presenter.convert(model: question)
@@ -83,9 +81,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
-        if isCorrect {
-            correctAnswers += 1
-        }
+        if isCorrect { correctAnswers += 1 }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else { return }
@@ -105,9 +101,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     private func showNextQuestionOrResults() {
         if presenter.isLastQuestion() {
-            guard let statisticService else {
-                return
-            }
+            guard let statisticService else { return }
             statisticService.store(correct: correctAnswers, total: presenter.questionsAmount)
             let countQuiz = storage.integer(forKey: Keys.gamesCount.rawValue)
             
