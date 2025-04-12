@@ -28,25 +28,19 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         statisticService = StatisticService()
         showLoadingIndicator()
         questionFactory?.loadData()
+        
+        presenter.viewController = self
     }
     
     // MARK: - IB Actions
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion else {
-            return
-        }
-        
-        let givenAnswer = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        presenter.currentQuestion = currentQuestion
+        presenter.noButtonClicked()
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion else {
-            return
-        }
-        
-        let givenAnswer = true
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -81,14 +75,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         showNetworkError(massage: error.localizedDescription)
     }
     
-    // MARK: - Private Methods
-    private func show(quiz step: QuizStepViewModel) {
-        imageView.image = step.image
-        textLabel.text = step.question
-        counterLabel.text = step.questionNumber
-    }
-    
-    private func showAnswerResult(isCorrect: Bool) {
+    // MARK: - Prublic Methods
+    func showAnswerResult(isCorrect: Bool) {
         self.noButton.isUserInteractionEnabled = false
         self.yesButton.isUserInteractionEnabled = false
         imageView.layer.masksToBounds = true
@@ -106,6 +94,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             self.showNextQuestionOrResults()
             self.imageView.layer.borderWidth = 0
         }
+    }
+    
+    // MARK: - Private Methods
+    private func show(quiz step: QuizStepViewModel) {
+        imageView.image = step.image
+        textLabel.text = step.question
+        counterLabel.text = step.questionNumber
     }
     
     private func showNextQuestionOrResults() {
