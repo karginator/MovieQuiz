@@ -11,11 +11,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Private Properties
-    private var correctAnswers = 0
-    private let storage: UserDefaults = .standard
-    private var questionFactory: QuestionFactoryProtocol?
+    private var correctAnswers = 0 //---
+    private let storage: UserDefaults = .standard //---
+    private var questionFactory: QuestionFactoryProtocol? //---
     private var alertPresenter: AlertPresenterProtocol?
-    private var statisticService: StatisticServiceProtocol?
+    private var statisticService: StatisticServiceProtocol? //---
     private var presenter = MovieQuizPresenter()
     
     // MARK: - View Life Cycles
@@ -78,7 +78,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             guard let self else { return }
             self.noButton.isUserInteractionEnabled = true
             self.yesButton.isUserInteractionEnabled = true
-            self.showNextQuestionOrResults()
+            
+            self.presenter.correctAnswers = self.correctAnswers
+            self.presenter.questionFactory = self.questionFactory
+            self.presenter.statisticService = self.statisticService
+            
+            self.presenter.showNextQuestionOrResults()
             self.imageView.layer.borderWidth = 0
         }
     }
@@ -89,31 +94,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         counterLabel.text = step.questionNumber
     }
     
-    // MARK: - Private Methods
-    private func showNextQuestionOrResults() {
-        if presenter.isLastQuestion() {
-            guard let statisticService else { return }
-            statisticService.store(correct: correctAnswers, total: presenter.questionsAmount)
-            let countQuiz = storage.integer(forKey: Keys.gamesCount.rawValue)
-            
-            let text = """
-                    Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)
-                    Количество сыгранных квизов: \(countQuiz)
-                    Рекорд: \(statisticService.bestGame.correct)/\(presenter.questionsAmount) (\(statisticService.bestGame.date.dateTimeString))
-                    Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
-                    """
-            
-            show(quiz: QuizResultsViewModel(
-                title: "Этот раунд окончен!",
-                text: text,
-                buttonText: "Сыграть ещё раз"))
-        } else {
-            presenter.switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
-        }
-    }
-    
-    private func show(quiz result: QuizResultsViewModel) {
+    func show(quiz result: QuizResultsViewModel) {
         
         let complition = { [weak self] in
             guard let self else { return }
@@ -134,6 +115,30 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         alertPresenter.createAlert(create: alert)
     }
+    
+    // MARK: - Private Methods
+//    private func showNextQuestionOrResults() {
+//        if presenter.isLastQuestion() {
+//            guard let statisticService else { return }
+//            statisticService.store(correct: correctAnswers, total: presenter.questionsAmount)
+//            let countQuiz = storage.integer(forKey: Keys.gamesCount.rawValue)
+//            
+//            let text = """
+//                    Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)
+//                    Количество сыгранных квизов: \(countQuiz)
+//                    Рекорд: \(statisticService.bestGame.correct)/\(presenter.questionsAmount) (\(statisticService.bestGame.date.dateTimeString))
+//                    Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+//                    """
+//            
+//            show(quiz: QuizResultsViewModel(
+//                title: "Этот раунд окончен!",
+//                text: text,
+//                buttonText: "Сыграть ещё раз"))
+//        } else {
+//            presenter.switchToNextQuestion()
+//            questionFactory?.requestNextQuestion()
+//        }
+//    }
     
     private func showLoadingIndicator() {
         activityIndicator.isHidden = false
