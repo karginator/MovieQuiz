@@ -7,17 +7,50 @@
 
 import UIKit
 
-final class MovieQuizPresenter {
+final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     // MARK: - Public Properties
     let questionsAmount: Int = 10
     var correctAnswers = 0
     var currentQuestion: QuizQuestion?
-    var questionFactory: QuestionFactoryProtocol? //---
-    weak var viewController: MovieQuizViewController?
     
     // MARK: - Private Properties
     private var currentQuestionIndex = 0
+    private var questionFactory: QuestionFactoryProtocol?
+    private weak var viewController: MovieQuizViewController?
+    
+    // MARK: - Initializers
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+        viewController.showLoadingIndicator()
+    }
+    
+    // MARK: - QuestionFactoryDelegate
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question else { return }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel)
+        }
+    }
+    
+    // MARK: - didLoadDataFromServer
+    func didLoadDataFromServer() {
+        viewController?.hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    // MARK: - didFailToLoadData
+    func didFailToLoadData(with error: Error) {
+        let message = error.localizedDescription
+        viewController?.showNetworkError(massage: message)
+    }
     
     // MARK: - Public Methods
     func isLastQuestion() -> Bool { currentQuestionIndex == questionsAmount - 1 }
@@ -25,6 +58,7 @@ final class MovieQuizPresenter {
     func restartGame() {
         currentQuestionIndex = 0
         correctAnswers = 0
+        questionFactory?.requestNextQuestion()
     }
     
     func switchToNextQuestion() { currentQuestionIndex += 1 }
@@ -43,17 +77,6 @@ final class MovieQuizPresenter {
     
     func yesButtonClicked() {
         didAnswer(isYes: true)
-    }
-    
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question else { return }
-        
-        currentQuestion = question
-        let viewModel = convert(model: question)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.viewController?.show(quiz: viewModel)
-        }
     }
     
     func showNextQuestionOrResults() {
