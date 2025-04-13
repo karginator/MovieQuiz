@@ -11,11 +11,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Private Properties
-    private var correctAnswers = 0 //---
-    private let storage: UserDefaults = .standard //---
+    private let storage: UserDefaults = .standard
     private var questionFactory: QuestionFactoryProtocol? //---
     private var alertPresenter: AlertPresenterProtocol?
-    private var statisticService: StatisticServiceProtocol? //---
+    private var statisticService: StatisticServiceProtocol?
     private var presenter = MovieQuizPresenter()
     
     // MARK: - View Life Cycles
@@ -33,12 +32,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // MARK: - IB Actions
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-//        presenter.currentQuestion = currentQuestion
         presenter.noButtonClicked()
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-//        presenter.currentQuestion = currentQuestion
         presenter.yesButtonClicked()
     }
     
@@ -72,17 +69,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
-        if isCorrect { correctAnswers += 1 }
+        presenter.didAnswer(idCorrectAnswer: isCorrect)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else { return }
             self.noButton.isUserInteractionEnabled = true
             self.yesButton.isUserInteractionEnabled = true
-            
-            self.presenter.correctAnswers = self.correctAnswers
             self.presenter.questionFactory = self.questionFactory
-            self.presenter.statisticService = self.statisticService
-            
             self.presenter.showNextQuestionOrResults()
             self.imageView.layer.borderWidth = 0
         }
@@ -96,16 +89,26 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     func show(quiz result: QuizResultsViewModel) {
         
+        guard let statisticService else { return }
+        statisticService.store(correct: presenter.correctAnswers, total: presenter.questionsAmount)
+        let countQuiz = storage.integer(forKey: Keys.gamesCount.rawValue)
+        
+        let text = """
+                Ваш результат: \(presenter.correctAnswers)/\(presenter.questionsAmount)
+                Количество сыгранных квизов: \(countQuiz)
+                Рекорд: \(statisticService.bestGame.correct)/\(presenter.questionsAmount) (\(statisticService.bestGame.date.dateTimeString))
+                Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+                """
+        
         let complition = { [weak self] in
             guard let self else { return }
-            presenter.resetQuestionIndex()
-            correctAnswers = 0
+            presenter.restartGame()
             questionFactory?.requestNextQuestion()
         }
         
         let alert = AlertModel(
             title: result.title,
-            message: result.text,
+            message: text,
             buttonText: result.buttonText,
             complition: complition)
         
@@ -117,28 +120,28 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     }
     
     // MARK: - Private Methods
-//    private func showNextQuestionOrResults() {
-//        if presenter.isLastQuestion() {
-//            guard let statisticService else { return }
-//            statisticService.store(correct: correctAnswers, total: presenter.questionsAmount)
-//            let countQuiz = storage.integer(forKey: Keys.gamesCount.rawValue)
-//            
-//            let text = """
-//                    Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)
-//                    Количество сыгранных квизов: \(countQuiz)
-//                    Рекорд: \(statisticService.bestGame.correct)/\(presenter.questionsAmount) (\(statisticService.bestGame.date.dateTimeString))
-//                    Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
-//                    """
-//            
-//            show(quiz: QuizResultsViewModel(
-//                title: "Этот раунд окончен!",
-//                text: text,
-//                buttonText: "Сыграть ещё раз"))
-//        } else {
-//            presenter.switchToNextQuestion()
-//            questionFactory?.requestNextQuestion()
-//        }
-//    }
+    private func showNextQuestionOrResults() {
+        if presenter.isLastQuestion() {
+            guard let statisticService else { return }
+            statisticService.store(correct: presenter.correctAnswers, total: presenter.questionsAmount)
+            let countQuiz = storage.integer(forKey: Keys.gamesCount.rawValue)
+            
+            let text = """
+                    Ваш результат: \(presenter.correctAnswers)/\(presenter.questionsAmount)
+                    Количество сыгранных квизов: \(countQuiz)
+                    Рекорд: \(statisticService.bestGame.correct)/\(presenter.questionsAmount) (\(statisticService.bestGame.date.dateTimeString))
+                    Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+                    """
+            
+            show(quiz: QuizResultsViewModel(
+                title: "Этот раунд окончен!",
+                text: text,
+                buttonText: "Сыграть ещё раз"))
+        } else {
+            presenter.switchToNextQuestion()
+            questionFactory?.requestNextQuestion()
+        }
+    }
     
     private func showLoadingIndicator() {
         activityIndicator.isHidden = false
@@ -154,8 +157,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         let complition = { [weak self] in
             guard let self else { return }
-            presenter.resetQuestionIndex()
-            correctAnswers = 0
+            presenter.restartGame()
             questionFactory?.requestNextQuestion()
             questionFactory?.loadData()
         }
