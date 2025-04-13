@@ -35,28 +35,10 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
     // MARK: - AlertPresenterDelegate
     func alertPresenter(present alert: UIAlertController?) {
         guard let alert else { return }
-        self.present(alert, animated: true, completion: nil)
+        present(alert, animated: true, completion: nil)
     }
     
     // MARK: - Prublic Methods
-    func proceedWithAnswer(isCorrect: Bool) {
-        self.noButton.isEnabled = false
-        self.yesButton.isEnabled = false
-        imageView.layer.masksToBounds = true
-        imageView.layer.borderWidth = 8
-        imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        
-        presenter.didAnswer(idCorrectAnswer: isCorrect)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self else { return }
-            self.noButton.isEnabled = true
-            self.yesButton.isEnabled = true
-            self.presenter.proceedToNextQuestionOrResults()
-            self.imageView.layer.borderWidth = 0
-        }
-    }
-    
     func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
@@ -98,6 +80,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
         
         let complition = { [weak self] in
             guard let self else { return }
+            presenter.repeatLoadData()
             presenter.restartGame()
         }
         
@@ -125,7 +108,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
     }
     
     func isEnabledButton(isTrue: Bool) {
-        self.noButton.isEnabled = isTrue
-        self.yesButton.isEnabled = isTrue
+        noButton.isEnabled = isTrue
+        yesButton.isEnabled = isTrue
     }
 }

@@ -83,13 +83,13 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
     
     func proceedToNextQuestionOrResults() {
-        if self.isLastQuestion() {
+        if isLastQuestion() {
             viewController?.show(quiz: QuizResultsViewModel(
                 title: "Этот раунд окончен!",
                 text: "",
                 buttonText: "Сыграть ещё раз"))
         } else {
-            self.switchToNextQuestion()
+            switchToNextQuestion()
             questionFactory?.requestNextQuestion()
         }
     }
@@ -100,18 +100,18 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     func makeResultsMessage() -> String {
         guard let statisticService else { return "" }
-        statisticService.store(correct: self.correctAnswers, total: self.questionsAmount)
+        statisticService.store(correct: correctAnswers, total: questionsAmount)
         let countQuiz = storage.integer(forKey: Keys.gamesCount.rawValue)
         let text = """
-                Ваш результат: \(self.correctAnswers)/\(self.questionsAmount)
+                Ваш результат: \(correctAnswers)/\(questionsAmount)
                 Количество сыгранных квизов: \(countQuiz)
-                Рекорд: \(statisticService.bestGame.correct)/\(self.questionsAmount) (\(statisticService.bestGame.date.dateTimeString))
+                Рекорд: \(statisticService.bestGame.correct)/\(questionsAmount) (\(statisticService.bestGame.date.dateTimeString))
                 Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
                 """
         return text
     }
     
-    func showAnswerResult(isCorrect: Bool) {
+    func proceedAnswerResult(isCorrect: Bool) {
         viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
         viewController?.isEnabledButton(isTrue: false)
         
@@ -121,14 +121,18 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             guard let self else { return }
             viewController?.isEnabledButton(isTrue: true)
             viewController?.zeroBorderWidth()
-            self.proceedToNextQuestionOrResults()
+            proceedToNextQuestionOrResults()
         }
+    }
+    
+    func repeatLoadData() {
+        questionFactory?.loadData()
     }
     
     // MARK: - Private Methods
     private func didAnswer(isYes: Bool) {
         guard let currentQuestion else { return }
         let givenAnswer = isYes
-        viewController?.proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        proceedAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
 }
