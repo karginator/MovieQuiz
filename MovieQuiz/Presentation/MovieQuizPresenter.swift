@@ -8,17 +8,15 @@
 import UIKit
 
 final class MovieQuizPresenter: QuestionFactoryDelegate {
-    
-    // MARK: - Public Properties
-    let questionsAmount: Int = 10
-    var correctAnswers = 0
-    var currentQuestion: QuizQuestion?
-    
+        
     // MARK: - Private Properties
     private let storage: UserDefaults = .standard
+    private let questionsAmount: Int = 10
+    private var correctAnswers = 0
     private var currentQuestionIndex = 0
     private var questionFactory: QuestionFactoryProtocol?
-    private var statisticService: StatisticServiceProtocol?
+    private var currentQuestion: QuizQuestion?
+    private var statisticService: StatisticServiceProtocol!
     private weak var viewController: MovieQuizViewController?
     
     // MARK: - Initializers
@@ -56,22 +54,10 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
     
     // MARK: - Public Methods
-    func isLastQuestion() -> Bool { currentQuestionIndex == questionsAmount - 1 }
-    
     func restartGame() {
         currentQuestionIndex = 0
         correctAnswers = 0
         questionFactory?.requestNextQuestion()
-    }
-    
-    func switchToNextQuestion() { currentQuestionIndex += 1 }
-    
-    func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStep = QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
-            question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-        return questionStep
     }
     
     func noButtonClicked() {
@@ -80,22 +66,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     func yesButtonClicked() {
         didAnswer(isYes: true)
-    }
-    
-    func proceedToNextQuestionOrResults() {
-        if isLastQuestion() {
-            viewController?.show(quiz: QuizResultsViewModel(
-                title: "Этот раунд окончен!",
-                text: "",
-                buttonText: "Сыграть ещё раз"))
-        } else {
-            switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
-        }
-    }
-    
-    func didAnswer(idCorrectAnswer: Bool) {
-        if idCorrectAnswer { correctAnswers += 1 }
     }
     
     func makeResultsMessage() -> String {
@@ -111,7 +81,40 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         return text
     }
     
-    func proceedAnswerResult(isCorrect: Bool) {
+    func repeatLoadData() {
+        questionFactory?.loadData()
+    }
+    
+    // MARK: - Private Methods
+    private func isLastQuestion() -> Bool { currentQuestionIndex == questionsAmount - 1 }
+    
+    private func switchToNextQuestion() { currentQuestionIndex += 1 }
+    
+    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+        let questionStep = QuizStepViewModel(
+            image: UIImage(data: model.image) ?? UIImage(),
+            question: model.text,
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+        return questionStep
+    }
+    
+    private func proceedToNextQuestionOrResults() {
+        if isLastQuestion() {
+            viewController?.show(quiz: QuizResultsViewModel(
+                title: "Этот раунд окончен!",
+                text: "",
+                buttonText: "Сыграть ещё раз"))
+        } else {
+            switchToNextQuestion()
+            questionFactory?.requestNextQuestion()
+        }
+    }
+    
+    private func didAnswer(idCorrectAnswer: Bool) {
+        if idCorrectAnswer { correctAnswers += 1 }
+    }
+    
+    private func proceedAnswerResult(isCorrect: Bool) {
         viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
         viewController?.isEnabledButton(isTrue: false)
         
@@ -125,11 +128,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         }
     }
     
-    func repeatLoadData() {
-        questionFactory?.loadData()
-    }
-    
-    // MARK: - Private Methods
     private func didAnswer(isYes: Bool) {
         guard let currentQuestion else { return }
         let givenAnswer = isYes
