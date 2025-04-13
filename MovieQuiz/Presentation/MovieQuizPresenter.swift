@@ -15,14 +15,17 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     var currentQuestion: QuizQuestion?
     
     // MARK: - Private Properties
+    private let storage: UserDefaults = .standard
     private var currentQuestionIndex = 0
     private var questionFactory: QuestionFactoryProtocol?
+    private var statisticService: StatisticServiceProtocol?
     private weak var viewController: MovieQuizViewController?
     
     // MARK: - Initializers
     init(viewController: MovieQuizViewController) {
         self.viewController = viewController
         
+        statisticService = StatisticService()
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory?.loadData()
         viewController.showLoadingIndicator()
@@ -93,6 +96,19 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     func didAnswer(idCorrectAnswer: Bool) {
         if idCorrectAnswer { correctAnswers += 1 }
+    }
+    
+    func makeResultsMessage() -> String {
+        guard let statisticService else { return "" }
+        statisticService.store(correct: self.correctAnswers, total: self.questionsAmount)
+        let countQuiz = storage.integer(forKey: Keys.gamesCount.rawValue)
+        let text = """
+                Ваш результат: \(self.correctAnswers)/\(self.questionsAmount)
+                Количество сыгранных квизов: \(countQuiz)
+                Рекорд: \(statisticService.bestGame.correct)/\(self.questionsAmount) (\(statisticService.bestGame.date.dateTimeString))
+                Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+                """
+        return text
     }
     
     // MARK: - Private Methods

@@ -11,9 +11,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
     @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Private Properties
-    private let storage: UserDefaults = .standard
     private var alertPresenter: AlertPresenterProtocol?
-    private var statisticService: StatisticServiceProtocol?
     private var presenter: MovieQuizPresenter!
     
     // MARK: - View Life Cycles
@@ -22,7 +20,6 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
         
         imageView.layer.cornerRadius = 20
         presenter = MovieQuizPresenter(viewController: self)
-        statisticService = StatisticService()
         showLoadingIndicator()
     }
     
@@ -67,17 +64,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
     }
     
     func show(quiz result: QuizResultsViewModel) {
-        
-        guard let statisticService else { return }
-        statisticService.store(correct: presenter.correctAnswers, total: presenter.questionsAmount)
-        let countQuiz = storage.integer(forKey: Keys.gamesCount.rawValue)
-        
-        let text = """
-                Ваш результат: \(presenter.correctAnswers)/\(presenter.questionsAmount)
-                Количество сыгранных квизов: \(countQuiz)
-                Рекорд: \(statisticService.bestGame.correct)/\(presenter.questionsAmount) (\(statisticService.bestGame.date.dateTimeString))
-                Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
-                """
+        let text = presenter.makeResultsMessage()
         
         let complition = { [weak self] in
             guard let self else { return }
