@@ -82,7 +82,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         didAnswer(isYes: true)
     }
     
-    func showNextQuestionOrResults() {
+    func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
             viewController?.show(quiz: QuizResultsViewModel(
                 title: "Этот раунд окончен!",
@@ -111,10 +111,24 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         return text
     }
     
+    func showAnswerResult(isCorrect: Bool) {
+        viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
+        viewController?.isEnabledButton(isTrue: false)
+        
+        didAnswer(idCorrectAnswer: isCorrect)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self else { return }
+            viewController?.isEnabledButton(isTrue: true)
+            viewController?.zeroBorderWidth()
+            self.proceedToNextQuestionOrResults()
+        }
+    }
+    
     // MARK: - Private Methods
     private func didAnswer(isYes: Bool) {
         guard let currentQuestion else { return }
         let givenAnswer = isYes
-        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        viewController?.proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
 }

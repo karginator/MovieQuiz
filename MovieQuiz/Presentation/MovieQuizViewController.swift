@@ -39,9 +39,9 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
     }
     
     // MARK: - Prublic Methods
-    func showAnswerResult(isCorrect: Bool) {
-        self.noButton.isUserInteractionEnabled = false
-        self.yesButton.isUserInteractionEnabled = false
+    func proceedWithAnswer(isCorrect: Bool) {
+        self.noButton.isEnabled = false
+        self.yesButton.isEnabled = false
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
@@ -50,9 +50,9 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else { return }
-            self.noButton.isUserInteractionEnabled = true
-            self.yesButton.isUserInteractionEnabled = true
-            self.presenter.showNextQuestionOrResults()
+            self.noButton.isEnabled = true
+            self.yesButton.isEnabled = true
+            self.presenter.proceedToNextQuestionOrResults()
             self.imageView.layer.borderWidth = 0
         }
     }
@@ -112,5 +112,20 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
         self.alertPresenter = alertPresenter
         
         alertPresenter.createAlert(create: alert)
+    }
+    
+    func highlightImageBorder(isCorrectAnswer: Bool) {
+            imageView.layer.masksToBounds = true
+            imageView.layer.borderWidth = 8
+            imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        }
+    
+    func zeroBorderWidth() {
+        imageView.layer.borderWidth = 0
+    }
+    
+    func isEnabledButton(isTrue: Bool) {
+        self.noButton.isEnabled = isTrue
+        self.yesButton.isEnabled = isTrue
     }
 }
