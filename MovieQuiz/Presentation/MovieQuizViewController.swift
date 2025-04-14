@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol, AlertPresenterDelegate {
     
     // MARK: - IB Outlets
     @IBOutlet private weak var imageView: UIImageView!
@@ -75,7 +75,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
         activityIndicator.startAnimating()
     }
     
-    func showNetworkError(massage: String) {
+    func showNetworkError(message: String) {
         hideLoadingIndicator()
         
         let complition = { [weak self] in
@@ -86,7 +86,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
         
         let alert = AlertModel(
             title: "Ошибка",
-            message: massage,
+            message: message,
             buttonText: "Попробуй еще раз",
             complition: complition)
         

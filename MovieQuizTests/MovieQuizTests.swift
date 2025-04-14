@@ -6,6 +6,7 @@
 //
 
 import XCTest
+@testable import MovieQuiz
 
 struct ArithmeticOperations {
     func addition(num1: Int, num2: Int, handler: @escaping (Int) -> Void) {

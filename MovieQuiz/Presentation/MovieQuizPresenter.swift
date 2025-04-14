@@ -17,10 +17,10 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var statisticService: StatisticServiceProtocol!
-    private weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewControllerProtocol?
     
     // MARK: - Initializers
-    init(viewController: MovieQuizViewController) {
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         
         statisticService = StatisticService()
@@ -50,7 +50,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     // MARK: - didFailToLoadData
     func didFailToLoadData(with error: Error) {
         let message = error.localizedDescription
-        viewController?.showNetworkError(massage: message)
+        viewController?.showNetworkError(message: message)
     }
     
     // MARK: - Public Methods
@@ -85,18 +85,18 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         questionFactory?.loadData()
     }
     
-    // MARK: - Private Methods
-    private func isLastQuestion() -> Bool { currentQuestionIndex == questionsAmount - 1 }
-    
-    private func switchToNextQuestion() { currentQuestionIndex += 1 }
-    
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+    func convert(model: QuizQuestion) -> QuizStepViewModel {
         let questionStep = QuizStepViewModel(
             image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
         return questionStep
     }
+    
+    // MARK: - Private Methods
+    private func isLastQuestion() -> Bool { currentQuestionIndex == questionsAmount - 1 }
+    
+    private func switchToNextQuestion() { currentQuestionIndex += 1 }
     
     private func proceedToNextQuestionOrResults() {
         if isLastQuestion() {
