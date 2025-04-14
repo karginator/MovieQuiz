@@ -5,17 +5,16 @@
 //  Created by Maksim Kargin on 06.04.2025.
 //
 
-//import UIKit
 import XCTest
 @testable import MovieQuiz
 
 struct StubNetworkClient: NetworkRouting {
     
-    enum TestError: Error { // тестовая ошибка
+    enum TestError: Error {
     case test
     }
     
-    let emulateError: Bool // этот параметр нужен, чтобы заглушка эмулировала либо ошибку сети, либо успешный ответ
+    let emulateError: Bool
     
     func fetch(url: URL, handler: @escaping (Result<Data, Error>) -> Void) {
         if emulateError {
@@ -69,7 +68,9 @@ class MoviesLoaderTests: XCTestCase {
         
         loader.loadMovies { result in
             switch result {
-            case .success(let movies): expectation.fulfill()
+            case .success(let movies):
+                XCTAssertEqual(movies.items.count, 2)
+                expectation.fulfill()
             case .failure(_): XCTFail("Unexpected failure")
             }
         }

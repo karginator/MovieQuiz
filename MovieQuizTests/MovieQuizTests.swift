@@ -29,22 +29,14 @@ struct ArithmeticOperations {
 
 final class MovieQuizTests: XCTestCase {
     
-//    func testAddition() throws {
-//        let arithmeticOperations = ArithmeticOperations()
-//        let result = arithmeticOperations.addition(num1: 1, num2: 2)
-//        XCTAssertEqual(result, 3)
-//    }
     func testAddition() throws {
         
-        //Given
         let arithmeticOperations = ArithmeticOperations()
         let num1 = 1
         let num2 = 2
         
-        // When
         let expectation = expectation(description: "Addition function expectation")
         arithmeticOperations.addition(num1: num1, num2: num2) { result in
-            // Then
             XCTAssertEqual(result, 3)
             expectation.fulfill()
         }
